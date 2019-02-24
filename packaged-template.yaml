@@ -12,38 +12,57 @@ Globals:
           Ref: SamSampleDynamoTable
         TABLE_ORDER: order
     MemorySize: 256
+    Runtime: python3.6
     Timeout: 15
-Outputs:
-  HelloWorldApi:
-    Description: API Gateway endpoint URL for Prod stage for Hello World function
-    Value:
-      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/
-  HelloWorldFunction:
-    Description: Hello World Lambda Function ARN
-    Value:
-      Fn::GetAtt:
-      - HelloWorldFunction
-      - Arn
-  HelloWorldFunctionIamRole:
-    Description: Implicit IAM Role created for Hello World function
-    Value:
-      Fn::GetAtt:
-      - HelloWorldFunctionRole
-      - Arn
 Resources:
   HelloWorldFunction:
     Properties:
-      CodeUri: s3://sam.saga-ec/e689ecfa3ed8498607003c6462c74418
+      CodeUri: s3://sam.saga-ec/29893080ae48e348b6f70eb4bba588b3
       Environment:
         Variables:
           PARAM1: VALUE
       Events:
-        HelloWorld:
+        Api:
           Properties:
             Method: get
             Path: /hello
           Type: Api
       Handler: lambda_function.lambda_handler
+      Role:
+        Fn::GetAtt:
+        - LambdaToDynamoDbIamRole
+        - Arn
+      Runtime: python3.6
+    Type: AWS::Serverless::Function
+  LambdaToDynamoDbIamRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+        Version: '2012-10-17'
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action: dynamodb:*
+            Effect: Allow
+            Resource: '*'
+          Version: '2012-10-17'
+        PolicyName: billing_mail_for_lambda
+    Type: AWS::IAM::Role
+  SamGetFunction:
+    Properties:
+      CodeUri: s3://sam.saga-ec/6d710008db346d6356857a0547021b11
+      Events:
+        Api:
+          Properties:
+            Method: get
+            Path: /sample
+          Type: Api
+      Handler: get_function.lambda_handler
+      Role: arn:aws:iam::725683553534:role/saga-ec-Lambda
       Runtime: python3.6
     Type: AWS::Serverless::Function
   SamSampleDynamoTable:

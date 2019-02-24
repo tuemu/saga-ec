@@ -8,6 +8,7 @@ Description: >
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
     Function:
+        Runtime: python3.6
         Timeout: 15
         MemorySize: 256
         Environment: 
@@ -22,16 +23,32 @@ Resources:
         Properties:
             CodeUri: 'functions/sample_function/lambda_function.zip'
             Handler: lambda_function.lambda_handler
+            Role: !GetAtt LambdaToDynamoDbIamRole.Arn # arn:aws:iam::725683553534:role/saga-ec-Lambda  
             Runtime: python3.6
             Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
                 Variables:
                     PARAM1: VALUE
             Events:
-                HelloWorld:
+                Api:
                     Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
                     Properties:
                         Path: /hello
                         Method: get
+
+    SamGetFunction: # 新たに追加した Lambda Function 
+      Type: AWS::Serverless::Function
+      Properties:
+        Runtime: python3.6
+        Handler: get_function.lambda_handler
+        Role: arn:aws:iam::725683553534:role/saga-ec-Lambda  
+        CodeUri: 'functions/get_function/lambda_function.zip'
+        Events:
+          Api:
+            Type: Api
+            Properties:
+              Path: /sample
+              Method: get
+
     SamSampleDynamoTable:
       Type: AWS::Serverless::SimpleTable
       Properties:
@@ -41,17 +58,38 @@ Resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 2
           WriteCapacityUnits: 2
+ 
+    LambdaToDynamoDbIamRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: lambda.amazonaws.com
+              Action: "sts:AssumeRole"
+        Policies:
+          -
+            PolicyName: "billing_mail_for_lambda"
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                -
+                  Effect: "Allow"
+                  Action: "dynamodb:*"
+                  Resource: "*"
 
-Outputs:
+# Outputs:
 
-    HelloWorldApi:
-      Description: "API Gateway endpoint URL for Prod stage for Hello World function"
-      Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
+    # HelloWorldApi:
+    #   Description: "API Gateway endpoint URL for Prod stage for Hello World function"
+    #   Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
 
-    HelloWorldFunction:
-      Description: "Hello World Lambda Function ARN"
-      Value: !GetAtt HelloWorldFunction.Arn
+    # HelloWorldFunction:
+    #   Description: "Hello World Lambda Function ARN"
+    #   Value: !GetAtt HelloWorldFunction.Arn
 
-    HelloWorldFunctionIamRole:
-      Description: "Implicit IAM Role created for Hello World function"
-      Value: !GetAtt HelloWorldFunctionRole.Arn
+    # HelloWorldFunctionIamRole:
+    #   Description: "Implicit IAM Role created for Hello World function"
+    #   Value: !GetAtt HelloWorldFunctionRole.Arn

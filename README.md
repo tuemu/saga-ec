@@ -25,7 +25,12 @@ This is a sample template for saga-ec - Below is a brief explanation of what we 
 - Zipping
 
 ```
-zip -r lambda_function.zip ./
+cd saga-ec
+```
+
+```
+rm -rf ./functions/sample_function/lambda_function.zip
+zip -r ./functions/sample_function/lambda_function.zip ./functions/sample_function/
 
 ```
 

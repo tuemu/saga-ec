@@ -10,14 +10,14 @@ Globals:
       Variables:
         TABLE_NAME:
           Ref: SamSampleDynamoTable
-        TABLE_ORDER: order
+        TABLE_ORDER: SagaEcOrder
     MemorySize: 256
     Runtime: python3.6
     Timeout: 15
 Resources:
   HelloWorldFunction:
     Properties:
-      CodeUri: s3://sam.saga-ec/29893080ae48e348b6f70eb4bba588b3
+      CodeUri: s3://sam.saga-ec/7dca1a683d34a12e5068ac4f08c97bc8
       Environment:
         Variables:
           PARAM1: VALUE
@@ -27,7 +27,7 @@ Resources:
             Method: get
             Path: /hello
           Type: Api
-      Handler: lambda_function.lambda_handler
+      Handler: functions.sample_function.lambda_function.lambda_handler
       Role:
         Fn::GetAtt:
         - LambdaToDynamoDbIamRole

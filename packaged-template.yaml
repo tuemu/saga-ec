@@ -17,7 +17,7 @@ Globals:
 Resources:
   HelloWorldFunction:
     Properties:
-      CodeUri: s3://sam.saga-ec/7dca1a683d34a12e5068ac4f08c97bc8
+      CodeUri: s3://sam.saga-ec/67239d35f513ed02f93e7fc9c6b26f68
       Environment:
         Variables:
           PARAM1: VALUE
@@ -27,7 +27,7 @@ Resources:
             Method: get
             Path: /hello
           Type: Api
-      Handler: functions.sample_function.lambda_function.lambda_handler
+      Handler: lambda_function.lambda_handler
       Role:
         Fn::GetAtt:
         - LambdaToDynamoDbIamRole

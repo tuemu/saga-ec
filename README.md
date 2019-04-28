@@ -16,6 +16,17 @@ This is a sample template for saga-ec - Below is a brief explanation of what we 
         └── test_handler.py
 ```
 
+## CRUD commnad in local
+
+### READ
+
+    python-lambda-local -f read order.py event.json
+
+### CREATE
+
+    python-lambda-local -f create order.py event.json
+
+
 ## Referece
 
 - [AWS Serverless Application Model 入門ハンズオンシリーズ](https://www.ketancho.net/entry/aws_sam)

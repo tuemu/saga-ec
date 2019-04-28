@@ -21,19 +21,23 @@ def lambda_handler(event, context):
 
     _insert_dynamo(str(uuid.uuid4()), itemName)
 
-def get(event, context):
+def list(event, context):
+    res = dynamodb.scan()
+    return { 'body' : str(res) }
 
-    # print(event["pathParameters"]["txId"])
+def read(event, context):
+    print(event["pathParameters"]["txId"])
     res = dynamodb.get_item(
         Key={
-            "TxId" : event["pathParameters"]["txId"]
+            "TxId": event["pathParameters"]["txId"]
         }   
     )   
     return { 'body' : str(res) }
 
 
 def create(event, context):
-    req = event # json.loads(event["body"]) if type(event["body"]) == str else event["body"]
+    req = json.loads(event["body"]) if type(event["body"]) == str else event["body"]
+    # req = event # json.loads(event["body"]) if type(event["body"]) == str else event["body"]
     orderNo = "OR-"+ datetime.now().isoformat()
     
     res = dynamodb.put_item(

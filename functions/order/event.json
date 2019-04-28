@@ -4,6 +4,15 @@
     "itemName": "pullover jacket",
     "price": "3000",
     "pathParameters": {
-        "txId": "b90e0597-86e4-4f6a-ac4c-5cb4b74d50c0"
+        "txId": "413a4005-afde-4af9-a448-a04a5f5c7129"
+    },
+    "body": {
+        "id": "prodid_0001",
+        "orderNo": "OR-9999-9999",
+        "itemName": "pullover jacket",
+        "price": "3000",
+        "pathParameters": {
+            "txId": "413a4005-afde-4af9-a448-a04a5f5c7129"
+        }
     }
 }

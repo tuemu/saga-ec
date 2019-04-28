@@ -14,7 +14,7 @@ Globals:
         Environment: 
           Variables: 
             TABLE_ORDER: SagaEcOrder
-            TABLE_NAME: !Ref SamSampleDynamoTable #★変更箇所
+            # TABLE_NAME: !Ref SamSampleDynamoTable #★変更箇所
 
 Resources:
 
@@ -35,29 +35,57 @@ Resources:
                         Path: /hello
                         Method: get
 
-    SamGetFunction: # 新たに追加した Lambda Function 
+    SagaEcOrderCreateFunction:
       Type: AWS::Serverless::Function
       Properties:
         Runtime: python3.6
-        Handler: get_function.lambda_handler
+        Handler: order.create
         Role: arn:aws:iam::725683553534:role/saga-ec-Lambda  
-        CodeUri: 'functions/get_function/lambda_function.zip'
+        CodeUri: 'functions/order/lambda_function.zip'
         Events:
           Api:
             Type: Api
             Properties:
-              Path: /sample
+              Path: /orders
+              Method: post
+
+    SagaEcOrderReadFunction:
+      Type: AWS::Serverless::Function
+      Properties:
+        Runtime: python3.6
+        Handler: order.read
+        Role: arn:aws:iam::725683553534:role/saga-ec-Lambda  
+        CodeUri: 'functions/order/lambda_function.zip'
+        Events:
+          Api:
+            Type: Api
+            Properties:
+              Path: /orders/{txId}
               Method: get
 
-    SamSampleDynamoTable:
-      Type: AWS::Serverless::SimpleTable
+    SagaEcOrderListFunction:
+      Type: AWS::Serverless::Function
       Properties:
-        PrimaryKey:
-          Name: name
-          Type: String
-        ProvisionedThroughput:
-          ReadCapacityUnits: 2
-          WriteCapacityUnits: 2
+        Runtime: python3.6
+        Handler: order.list
+        Role: arn:aws:iam::725683553534:role/saga-ec-Lambda  
+        CodeUri: 'functions/order/lambda_function.zip'
+        Events:
+          Api:
+            Type: Api
+            Properties:
+              Path: /orders
+              Method: get
+              
+    # SamSampleDynamoTable:
+    #   Type: AWS::Serverless::SimpleTable
+    #   Properties:
+    #     PrimaryKey:
+    #       Name: name
+    #       Type: String
+    #     ProvisionedThroughput:
+    #       ReadCapacityUnits: 2
+    #       WriteCapacityUnits: 2
 
     # SagaEcOrderTable:
     #   Type: AWS::DynamoDB::Table

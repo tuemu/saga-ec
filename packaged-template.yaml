@@ -8,8 +8,6 @@ Globals:
   Function:
     Environment:
       Variables:
-        TABLE_NAME:
-          Ref: SamSampleDynamoTable
         TABLE_ORDER: SagaEcOrder
     MemorySize: 256
     Runtime: python3.6
@@ -52,26 +50,43 @@ Resources:
           Version: '2012-10-17'
         PolicyName: billing_mail_for_lambda
     Type: AWS::IAM::Role
-  SamGetFunction:
+  SagaEcOrderCreateFunction:
     Properties:
-      CodeUri: s3://sam.saga-ec/6d710008db346d6356857a0547021b11
+      CodeUri: s3://sam.saga-ec/d2d8067257b123a24d1d073f5651e5a3
+      Events:
+        Api:
+          Properties:
+            Method: post
+            Path: /orders
+          Type: Api
+      Handler: order.create
+      Role: arn:aws:iam::725683553534:role/saga-ec-Lambda
+      Runtime: python3.6
+    Type: AWS::Serverless::Function
+  SagaEcOrderListFunction:
+    Properties:
+      CodeUri: s3://sam.saga-ec/d2d8067257b123a24d1d073f5651e5a3
       Events:
         Api:
           Properties:
             Method: get
-            Path: /sample
+            Path: /orders
           Type: Api
-      Handler: get_function.lambda_handler
+      Handler: order.list
       Role: arn:aws:iam::725683553534:role/saga-ec-Lambda
       Runtime: python3.6
     Type: AWS::Serverless::Function
-  SamSampleDynamoTable:
+  SagaEcOrderReadFunction:
     Properties:
-      PrimaryKey:
-        Name: name
-        Type: String
-      ProvisionedThroughput:
-        ReadCapacityUnits: 2
-        WriteCapacityUnits: 2
-    Type: AWS::Serverless::SimpleTable
+      CodeUri: s3://sam.saga-ec/d2d8067257b123a24d1d073f5651e5a3
+      Events:
+        Api:
+          Properties:
+            Method: get
+            Path: /orders/{txId}
+          Type: Api
+      Handler: order.read
+      Role: arn:aws:iam::725683553534:role/saga-ec-Lambda
+      Runtime: python3.6
+    Type: AWS::Serverless::Function
 Transform: AWS::Serverless-2016-10-31

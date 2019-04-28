@@ -8,6 +8,7 @@ Globals:
   Function:
     Environment:
       Variables:
+        QUEUE_ORDER: saga-ec-order.fifo
         TABLE_ORDER: SagaEcOrder
     MemorySize: 256
     Runtime: python3.6
@@ -52,7 +53,7 @@ Resources:
     Type: AWS::IAM::Role
   SagaEcOrderCreateFunction:
     Properties:
-      CodeUri: s3://sam.saga-ec/d2d8067257b123a24d1d073f5651e5a3
+      CodeUri: s3://sam.saga-ec/c814e82cf8e3b578f124cacef79d8d73
       Events:
         Api:
           Properties:
@@ -65,7 +66,7 @@ Resources:
     Type: AWS::Serverless::Function
   SagaEcOrderListFunction:
     Properties:
-      CodeUri: s3://sam.saga-ec/d2d8067257b123a24d1d073f5651e5a3
+      CodeUri: s3://sam.saga-ec/c814e82cf8e3b578f124cacef79d8d73
       Events:
         Api:
           Properties:
@@ -78,7 +79,7 @@ Resources:
     Type: AWS::Serverless::Function
   SagaEcOrderReadFunction:
     Properties:
-      CodeUri: s3://sam.saga-ec/d2d8067257b123a24d1d073f5651e5a3
+      CodeUri: s3://sam.saga-ec/c814e82cf8e3b578f124cacef79d8d73
       Events:
         Api:
           Properties:

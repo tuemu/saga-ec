@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import boto3
+import os
 import json
 import decimal
 import uuid
@@ -8,8 +9,17 @@ from datetime import datetime
 
 # Table name
 TABLE_NAME = "SagaEcOrder"
+# TABLE_NAME = os.environ['TABLE_ORDER']
 dynamodb = boto3.resource('dynamodb').Table(TABLE_NAME)
 
+QUEUE_NAME = "saga-ec-order"
+# QUEUE_NAME = "saga-ec-order.fifo"
+# QUEUE_NAME = os.environ['QUEUE_ORDER']
+sqs = boto3.resource('sqs')
+
+
+name = 'test-load-mikami'
+sqs = boto3.resource('sqs')
 
 def lambda_handler(event, context):
 
@@ -39,23 +49,17 @@ def create(event, context):
     req = json.loads(event["body"]) if type(event["body"]) == str else event["body"]
     # req = event # json.loads(event["body"]) if type(event["body"]) == str else event["body"]
     orderNo = "OR-"+ datetime.now().isoformat()
-    
+    txId = str(uuid.uuid4())
+
     res = dynamodb.put_item(
         Item = {
-            "TxId": str(uuid.uuid4()),
+            "TxId": txId,
             "OrderNo": orderNo,
             "ItemName": req["itemName"],
             "Price": decimal.Decimal(req["price"])
         }
-        # ,
-        # UpdateExpression='set OrderNo = OrderNo + :val',
-        # ExpressionAttributeValues={
-        #     ':val': 1
-        # },
-        # ReturnValues='UPDATED_NEW'        }  
     )
-#    print(Item)
-    # print(json.dumps(res, indent=4, cls=DecimalEncoder))
+    enQueue(res)
     return { 'body' : str(res) }
 
 def _insert_dynamo(txId, itemName):
@@ -72,3 +76,20 @@ def _insert_dynamo(txId, itemName):
     # dynamo.put_item(Item = item)
 
     return {"status": "OK"}
+
+
+def enQueue(msg):
+    try:
+        # キューの名前を指定してインスタンスを取得
+        queue = sqs.get_queue_by_name(QueueName=QUEUE_NAME)
+    except:
+        # 指定したキューがない場合はexceptionが返るので、キューを作成
+        queue = sqs.create_queue(QueueName=QUEUE_NAME)
+    
+    # メッセージ×1をキューに送信
+    msg_num = 1
+    # msg_list = [msg]
+    msg_list = [{'Id' : '{}'.format(i+1), 'MessageBody' : 'msg_{}'.format(i+1)} for i in range(msg_num)]
+    print("# msg: "+  str(msg))
+    response = queue.send_messages(Entries=msg_list)
+    print(response)

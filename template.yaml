@@ -14,6 +14,7 @@ Globals:
         Environment: 
           Variables: 
             TABLE_ORDER: SagaEcOrder
+            QUEUE_ORDER: saga-ec-order.fifo
             # TABLE_NAME: !Ref SamSampleDynamoTable #★変更箇所
 
 Resources:

@@ -6,7 +6,7 @@
     "amount": 5,
     "price": 3000,
     "pathParameters": {
-        "txId": "413a4005-afde-4af9-a448-a04a5f5c7129"
+        "itemId": "A100"
     },
     "body": {
         "id": "prodid_0001",

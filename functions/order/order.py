@@ -57,7 +57,9 @@ def create(event, context):
     createItem = {
         "TxId": txId,
         "OrderNo": orderNo,
+        "ItemId": req["itemId"],
         "ItemName": req["itemName"],
+        "Amount": req["amount"],
         # "Price": decimal.Decimal(req["price"])
         "Price": req["price"]
     }

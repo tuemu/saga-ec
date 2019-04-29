@@ -13,9 +13,11 @@ TABLE_NAME = "SagaEcOrder"
 dynamodb = boto3.resource('dynamodb').Table(TABLE_NAME)
 
 QUEUE_NAME = "saga-ec-order"
+QUEUE_URL = "https://sqs.us-east-1.amazonaws.com/725683553534/saga-ec-order"
 # QUEUE_NAME = "saga-ec-order.fifo"
 # QUEUE_NAME = os.environ['QUEUE_ORDER']
 sqs = boto3.resource('sqs')
+client = boto3.client('sqs')
 
 
 name = 'test-load-mikami'
@@ -23,13 +25,14 @@ sqs = boto3.resource('sqs')
 
 def lambda_handler(event, context):
 
-    itemName = event['itemName']
-    price = event['price']
+    print("This method is dummy.")
+    # itemName = event['itemName']
+    # price = event['price']
 
-    print(itemName)
-    print(price)
+    # print(itemName)
+    # print(price)
 
-    _insert_dynamo(str(uuid.uuid4()), itemName)
+    # _insert_dynamo(str(uuid.uuid4()), itemName)
 
 def list(event, context):
     res = dynamodb.scan()
@@ -51,15 +54,18 @@ def create(event, context):
     orderNo = "OR-"+ datetime.now().isoformat()
     txId = str(uuid.uuid4())
 
+    createItem = {
+        "TxId": txId,
+        "OrderNo": orderNo,
+        "ItemName": req["itemName"],
+        # "Price": decimal.Decimal(req["price"])
+        "Price": req["price"]
+    }
+
     res = dynamodb.put_item(
-        Item = {
-            "TxId": txId,
-            "OrderNo": orderNo,
-            "ItemName": req["itemName"],
-            "Price": decimal.Decimal(req["price"])
-        }
+        Item = createItem
     )
-    enQueue(res)
+    enQueue(createItem)
     return { 'body' : str(res) }
 
 def _insert_dynamo(txId, itemName):
@@ -72,24 +78,15 @@ def _insert_dynamo(txId, itemName):
     }
     ''' % (price)
 
-    # item = json.loads(json_str, parse_float=decimal.Decimal)
-    # dynamo.put_item(Item = item)
-
     return {"status": "OK"}
 
 
 def enQueue(msg):
-    try:
-        # キューの名前を指定してインスタンスを取得
-        queue = sqs.get_queue_by_name(QueueName=QUEUE_NAME)
-    except:
-        # 指定したキューがない場合はexceptionが返るので、キューを作成
-        queue = sqs.create_queue(QueueName=QUEUE_NAME)
-    
-    # メッセージ×1をキューに送信
-    msg_num = 1
-    # msg_list = [msg]
-    msg_list = [{'Id' : '{}'.format(i+1), 'MessageBody' : 'msg_{}'.format(i+1)} for i in range(msg_num)]
+
     print("# msg: "+  str(msg))
-    response = queue.send_messages(Entries=msg_list)
+
+    response = client.send_message(
+        QueueUrl=QUEUE_URL,
+        MessageBody=json.dumps(msg)
+    )
     print(response)

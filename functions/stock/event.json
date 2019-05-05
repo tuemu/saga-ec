@@ -1,22 +1,10 @@
 {
-    "id": "prodid_0001",
-    "orderNo": "OR-9999-9999",
-    "itemName": "pullover jacket",
-    "itemId": "A100",
-    "amount": 5,
-    "price": 3000,
-    "pathParameters": {
-        "itemId": "A100"
-    },
     "body": {
-        "id": "prodid_0001",
+        "txId": "413a4005-afde-4af9-a448-a04a5f5c7129",
         "orderNo": "OR-9999-9999",
         "itemName": "pullover jacket",
         "itemId": "A100",
         "amount": 5,
-        "price": 3000,
-        "pathParameters": {
-            "txId": "413a4005-afde-4af9-a448-a04a5f5c7129"
-        }
+        "price": 3000
     }
 }

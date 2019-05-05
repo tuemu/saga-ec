@@ -27,15 +27,57 @@ def read(event, context):
     )   
     return { 'body' : str(res) }
 
-def reserve(event, context):
-    print("## itemId: " + event["itemId"])
-    print("## amount: " + str(event["amount"]))
-
+def readMaster(itemId):
     res = dynamodbMaster.get_item(
         Key={
-            "ItemId": event["pathParameters"]["itemId"]
+            "ItemId": itemId
         }   
+    )   
+    return res
+
+def updateMaster(itemId, stock):
+    print("## Start updateMaster(" + str(itemId) + ", " + str(stock) + ")")
+
+    res = dynamodbMaster.update_item(
+        Key={
+            'ItemId': itemId
+        },
+        UpdateExpression="set Stock=:stock",
+        ExpressionAttributeValues={
+            ':stock': stock
+        },
+        ReturnValues="UPDATED_NEW"
     )
+    return res
+
+    # res = dynamodb.Table(TABLE_NAME).update_item(
+    #     Key={
+    #         'id': event["pathParameters"]["id"]
+    #     },  
+    #     UpdateExpression="set isbn=:i, title=:t, price=:p",
+    #     ExpressionAttributeValues={
+    #         ':i': req["isbn"],
+    #         ':t': req["title"],
+    #         ':p': decimal.Decimal(req["price"])
+    #     },  
+    #     ReturnValues="UPDATED_NEW"
+    # )
+    # return { 'body' : str(res) }
+
+
+def isReserve(event, context):
+    req = json.loads(event["body"]) if type(event["body"]) == str else event["body"]
+    itemId = req["itemId"]
+    amount = req["amount"]
+    print("## itemId: " + str(itemId))
+    print("## amount: " + str(amount))
+
+    # res = dynamodbMaster.get_item(
+    #     Key={
+    #         "ItemId": event["pathParameters"]["itemId"]
+    #     }   
+    # )
+    res = readMaster(itemId)
     if 'Item' in res:
         item = res["Item"]
         print("## item: "+ str(item))
@@ -49,30 +91,58 @@ def reserve(event, context):
     else:
         print("## item: is NOTHING.")
     
-    if "stock" in locals():
+    if ("stock" in locals() and stock > amount):
         print("## stock: " + str(stock))
+        resMaster = updateMaster(itemId, stock - amount)
+        
+        return True #{'body': str(resMaster)}
+
     else:
         print("## stock: is Nothing.")
 
-    return { 'body' : str(res) }
+    return False #{ 'body' : str(res) }
+
 
 def create(event, context):
-    req = json.loads(event["body"]) if type(event["body"]) == str else event["body"]
-    txId = req["TxId"]
-    amount = req["Amount"]
-
-    createItem = {
-        "TxId": txId,
-        "OrderNo": orderNo,
-        "ItemName": req["itemName"],
-        # "Price": decimal.Decimal(req["price"])
-        "Price": req["price"]
-    }
+    if isReserve(event, context):
+        req = json.loads(event["body"]) if type(event["body"]) == str else event["body"]
+        print("req: "+ str(req))
+        txId = req["txId"]
+        orderNo = req["orderNo"]
+        itemName = req["itemName"]
+        itemId = req["itemId"]
+        amount = req["amount"]
+        createItem = {
+            "TxId": txId,
+            "OrderNo": orderNo,
+            "ItemName": itemName,
+            "ItemId": itemId,
+            # "Price": decimal.Decimal(req["price"])
+            "Amount": amount
+        }
 
     res = dynamodb.put_item(
         Item = createItem
     )
-    enQueue(createItem)
+    # enQueue(createItem)
+    return { 'body' : str(res) }
+
+def update(event, context):
+    print("## amount: " + str(event["amount"]))
+
+    req = json.loads(event["body"]) if type(event["body"]) == str else event["body"]
+    res = dynamodb.Table(TABLE_NAME).update_item(
+        Key={
+            'id': event["pathParameters"]["id"]
+        },  
+        UpdateExpression="set isbn=:i, title=:t, price=:p",
+        ExpressionAttributeValues={
+            ':i': req["isbn"],
+            ':t': req["title"],
+            ':p': decimal.Decimal(req["price"])
+        },  
+        ReturnValues="UPDATED_NEW"
+    )
     return { 'body' : str(res) }
 
 

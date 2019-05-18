@@ -4,7 +4,31 @@
         "orderNo": "OR-9999-9999",
         "itemName": "pullover jacket",
         "itemId": "A100",
+        "userId": "U100",
         "amount": 5,
         "price": 3000
-    }
+    },
+    "Records": [
+        {
+            "body": {
+                "txId": "cbb48a90-9f2d-453c-9b71-6812cdc5b2e9",
+                "orderNo": "OR-2019-05-12T08:40:11.882062",
+                "itemId": "A100",
+                "itemName": "pullover jacket",
+                "amount": 5,
+                "price": 3011
+            }
+        },
+        {
+            "body": {
+                "txId": "cbb48a90-9f2d-453c-9b71-6812cdc5b2e9",
+                "orderNo": "OR-2019-05-12T08:40:11.882062",
+                "itemId": "A200",
+                "itemName": "pullover jacket",
+                "amount": 5,
+                "price": 3022
+            }
+        }
+
+    ]
 }

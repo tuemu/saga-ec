@@ -18,24 +18,6 @@ Globals:
             # TABLE_NAME: !Ref SamSampleDynamoTable #★変更箇所
 
 Resources:
-
-    HelloWorldFunction:
-        Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
-        Properties:
-            CodeUri: 'functions/sample_function/lambda_function.zip'
-            Handler: lambda_function.lambda_handler
-            Role: !GetAtt LambdaToDynamoDbIamRole.Arn # arn:aws:iam::725683553534:role/saga-ec-Lambda  
-            Runtime: python3.6
-            Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
-                Variables:
-                    PARAM1: VALUE
-            Events:
-                Api:
-                    Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
-                    Properties:
-                        Path: /hello
-                        Method: get
-
     SagaEcOrderCreateFunction:
       Type: AWS::Serverless::Function
       Properties:
@@ -77,56 +59,40 @@ Resources:
             Properties:
               Path: /orders
               Method: get
-              
-    # SamSampleDynamoTable:
-    #   Type: AWS::Serverless::SimpleTable
-    #   Properties:
-    #     PrimaryKey:
-    #       Name: name
-    #       Type: String
-    #     ProvisionedThroughput:
-    #       ReadCapacityUnits: 2
-    #       WriteCapacityUnits: 2
 
-    # SagaEcOrderTable:
-    #   Type: AWS::DynamoDB::Table
-    #   Properties:
-    #     TableName: Order
-    #     AttributeDefinitions:
-    #       - 
-    #         AttributeName: "TxId"
-    #         AttributeType: "S"
-    #       - 
-    #         AttributeName: "OrderId"
-    #         AttributeType: "S"
-    #       - 
-    #         AttributeName: "UserId"
-    #         AttributeType: "S"
-    #       - 
-    #         AttributeName: "ItemName"
-    #         AttributeType: "S"
-    #       - 
-    #         AttributeName: "Price"
-    #         AttributeType: "N"
-    #       - 
-    #         AttributeName: "Quantity"
-    #         AttributeType: "N"
-    #       - 
-    #         AttributeName: "PrevTxId"
-    #         AttributeType: "S"
-    #       - 
-    #         AttributeName: "NextTxId"
-    #         AttributeType: "S"
-    #       - 
-    #         AttributeName: "DeleteFlag"
-    #         AttributeType: "BOOL"
-    #     KeySchema: 
-    #       - 
-    #         AttributeName: "TxId"
-    #         KeyType: "HASH"
-    #     ProvisionedThroughput:
-    #       ReadCapacityUnits: 2
-    #       WriteCapacityUnits: 2
+    SagaEcStockCreateFunction:
+      Type: AWS::Serverless::Function
+      Properties:
+        Runtime: python3.6
+        Handler: stock.create
+        Role: arn:aws:iam::725683553534:role/saga-ec-Lambda
+        CodeUri: 'functions/stock/lambda_function.zip'
+        Events:
+          Api:
+            Type: Api
+            Properties:
+              Path: /stocks
+              Method: post
+          MySQSEvent:
+            Type: SQS
+            Properties:
+              Queue: 'arn:aws:sqs:us-east-1:725683553534:saga-ec-order'
+              BatchSize: 10
+              
+    SagaEcPaymentCreateFunction:
+      Type: AWS::Serverless::Function
+      Properties:
+        Runtime: python3.6
+        Handler: payment.create
+        Role: arn:aws:iam::725683553534:role/saga-ec-Lambda
+        #lambda-queue 
+        CodeUri: 'functions/payment/lambda_function.zip'
+        Events:
+          Api:
+            Type: Api
+            Properties:
+              Path: /payment
+              Method: post
  
     LambdaToDynamoDbIamRole:
       Type: AWS::IAM::Role

@@ -61,7 +61,8 @@ def create(event, context):
         "ItemName": req["itemName"],
         "Amount": req["amount"],
         # "Price": decimal.Decimal(req["price"])
-        "Price": req["price"]
+        "Price": req["price"],
+        "UserId": req["userId"],
     }
 
     res = dynamodb.put_item(

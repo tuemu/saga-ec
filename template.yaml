@@ -32,6 +32,14 @@ Resources:
               Path: /orders
               Method: post
 
+    SagaEcOrderSfn:
+      Type: AWS::Serverless::Function
+      Properties:
+        Runtime: python3.6
+        Handler: order_sfn.create
+        Role: arn:aws:iam::725683553534:role/saga-ec-Lambda  
+        CodeUri: 'functions/order_sfn/lambda_function.zip'
+
     SagaEcOrderReadFunction:
       Type: AWS::Serverless::Function
       Properties:

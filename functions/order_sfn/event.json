@@ -1,23 +1,23 @@
 {
-    "txId": "30a1e207-13f7-4ea9-a7f9-435a0c56cc1f",
     "body": {
-        "txId": "30a1e207-13f7-4ea9-a7f9-435a0c56cc1f",
+        "txId": "413a4005-afde-4af9-a448-a04a5f5c7129",
         "orderNo": "OR-9999-9999",
         "itemName": "pullover jacket",
         "itemId": "A100",
         "userId": "U100",
         "amount": 5,
-        "price": 3000
+        "price": 300
     },
     "Records": [
         {
             "body": {
-                "txId": "30a1e207-13f7-4ea9-a7f9-435a0c56cc1f",
+                "txId": "cbb48a90-9f2d-453c-9b71-6812cdc5b2e9",
                 "orderNo": "OR-2019-05-12T08:40:11.882062",
                 "itemId": "A100",
+                "userId": "U100",
                 "itemName": "pullover jacket",
                 "amount": 5,
-                "price": 3011
+                "price": 311
             }
         },
         {
@@ -25,9 +25,10 @@
                 "txId": "cbb48a90-9f2d-453c-9b71-6812cdc5b2e9",
                 "orderNo": "OR-2019-05-12T08:40:11.882062",
                 "itemId": "A200",
+                "userId": "U100",
                 "itemName": "pullover jacket",
                 "amount": 5,
-                "price": 3022
+                "price": 322
             }
         }
 

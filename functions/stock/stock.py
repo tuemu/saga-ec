@@ -2,7 +2,7 @@
 import boto3
 import os
 import json
-import decimal
+from decimal import Decimal
 import uuid
 import decimal
 from datetime import datetime
@@ -28,6 +28,24 @@ def read(event, context):
         }   
     )   
     return res
+
+def update(txId:str, isCompensated:bool, compTxId:str):
+    print("## Start updateMaster(" + str(txId) + ", " + str(isCompensated) + ")")
+
+    res = dynamodb.update_item(
+        Key={
+            'TxId': txId
+        },
+        UpdateExpression="set IsCompensated=:isCompensated, CompTxId=:compTxId, UpdateDate=:updateDate",
+        ExpressionAttributeValues={
+            ':isCompensated': isCompensated,
+            ':compTxId': compTxId,
+            ':updateDate': datetime.now().isoformat()
+        },
+        ReturnValues="UPDATED_NEW"
+    )
+    return res
+
 
 def readMaster(itemId):
     res = dynamodbMaster.get_item(
@@ -113,6 +131,7 @@ def __extractRequest(event, context):
 
 
 def create(event, context):
+    print("## event: " +  json.dumps(event, indent=2, default=decimal_default_proc))
     requestList = __extractRequest(event, context)
     for req in requestList:
         if __isReserve(req):
@@ -123,13 +142,18 @@ def create(event, context):
             itemName = req["itemName"] if 'itemName' in req else req['ItemName']
             itemId = req["itemId"] if 'itemId' in req else req['ItemId']
             amount = req["amount"] if 'amount' in req else req['Amount']
+            originTxId = req["originTxId"] if 'originTxId' in req else None
+            
             createItem = {
                 "TxId": txId,
                 "OrderNo": orderNo,
                 "ItemName": itemName,
                 "ItemId": itemId,
                 # "Price": decimal.Decimal(req["price"])
-                "Amount": amount
+                "Amount": amount,
+                "OriginTxId": originTxId,
+                "IsCompensated": False
+                
             }
         res = dynamodb.put_item(
             Item = createItem
@@ -154,6 +178,17 @@ def createCompensated(event, context):
             itemId = item["ItemId"]
         else:
             print("## ItemId: is NOTHING.")
+
+        # Disable old Tx
+        update(event["txId"], True, event["compTxId"])
+
+        # Insert Compensated Tx
+        event["originTxId"] = event["txId"]
+        event["txId"] = event["compTxId"]
+        item["Amount"] = - amount
+        event.update(item)
+        del event["body"], event["Records"]
+        create(event, context)
 
         resMaster = readMaster(itemId)
         if 'Item' in resMaster:
@@ -183,21 +218,7 @@ def createCompensated(event, context):
 
     return False #{ 'body' : str(res) }
 
-
-def update(event, context):
-    print("## amount: " + str(event["amount"]))
-
-    req = json.loads(event["body"]) if type(event["body"]) == str else event["body"]
-    res = dynamodb.Table(TABLE_NAME).update_item(
-        Key={
-            'id': event["pathParameters"]["id"]
-        },  
-        UpdateExpression="set isbn=:i, title=:t, price=:p",
-        ExpressionAttributeValues={
-            ':i': req["isbn"],
-            ':t': req["title"],
-            ':p': decimal.Decimal(req["price"])
-        },  
-        ReturnValues="UPDATED_NEW"
-    )
-    return { 'body' : str(res) }
+def decimal_default_proc(obj):
+    if isinstance(obj, Decimal):
+        return float(obj)
+    raise TypeError

@@ -23,6 +23,17 @@ client = boto3.client('sqs')
 name = 'test-load-mikami'
 sqs = boto3.resource('sqs')
 
+def read(event, context):
+    # print(json.dumps(event, indent=2))
+    txId = event["pathParameters"]["txId"] if "pathParameters" in event else event["txId"]
+    print("txId for fetch: "+ str(txId))
+    res = dynamodb.get_item(
+        Key={
+            "TxId": txId
+        }   
+    )   
+    return res
+
 def lambda_handler(event, context):
 
     print("This method is dummy.")
@@ -38,14 +49,22 @@ def list(event, context):
     res = dynamodb.scan()
     return { 'body' : str(res) }
 
-def read(event, context):
-    print(event["pathParameters"]["txId"])
-    res = dynamodb.get_item(
+def update(txId:str, isCompensated:bool, compTxId:str):
+    print("## Start update(" + str(txId) + ", " + str(isCompensated) + ")")
+
+    res = dynamodb.update_item(
         Key={
-            "TxId": event["pathParameters"]["txId"]
-        }   
-    )   
-    return { 'body' : str(res) }
+            'TxId': txId
+        },
+        UpdateExpression="set IsCompensated=:isCompensated, CompTxId=:compTxId, UpdateDate=:updateDate",
+        ExpressionAttributeValues={
+            ':isCompensated': isCompensated,
+            ':compTxId': compTxId,
+            ':updateDate': datetime.now().isoformat()
+        },
+        ReturnValues="UPDATED_NEW"
+    )
+    return res
 
 
 def create(event, context):
@@ -70,6 +89,27 @@ def create(event, context):
     )
     enQueue(createItem)
     return { 'body' : str(res) }
+
+def createCompensated(event, context):
+    #requestList = __extractRequest(event, context)
+    #for req in requestList:
+    txId = event["txId"] if 'txId' in event else event['TxId']
+    temp = {"pathParameters": {"txId":txId}}
+    temp = event.update(temp)
+    res = read(event, context)
+    if 'Item' in res:
+        item = res["Item"]
+        print("## item: "+ str(item))
+
+        # Disable old Tx
+        compTxId = str(uuid.uuid4())
+        update(txId, True, compTxId)
+
+    else:
+        print("## Item: is NOTHING.")
+        return False
+
+    return {"compTxId": compTxId}
 
 def _insert_dynamo(txId, itemName):
     dynamo = boto3.resource('dynamodb').Table(TABLE_NAME)

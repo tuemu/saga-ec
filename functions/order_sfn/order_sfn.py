@@ -16,6 +16,7 @@ import json
 # The Amazon Resource Name (ARN) of the state machine to execute.
 # Example - arn:aws:states:us-west-2:112233445566:stateMachine:HelloWorld-StateMachine
 STATE_MACHINE_ARN = 'arn:aws:states:us-east-1:725683553534:stateMachine:SagaEcOrder'
+STATE_MACHINE_ARN_COMPENSATED = 'arn:aws:states:us-east-1:725683553534:stateMachine:SagaEcOrder_Copmensated'
 
 #The name of the execution
 EXECUTION_NAME = 'Exec-After-Order'
@@ -30,6 +31,21 @@ def create(event, context):
 
         response = sfn.start_execution(
             stateMachineArn=STATE_MACHINE_ARN,
+            # name=EXECUTION_NAME,
+            input=INPUT
+        )
+
+        #display the arn that identifies the execution
+        print(response.get('executionArn'))
+
+def createCompensated(event, context):
+    requestList = __extractRequest(event, context)
+    for req in requestList:
+        INPUT = json.dumps(req)
+        sfn = boto3.client('stepfunctions')
+
+        response = sfn.start_execution(
+            stateMachineArn=STATE_MACHINE_ARN_COMPENSATED,
             # name=EXECUTION_NAME,
             input=INPUT
         )

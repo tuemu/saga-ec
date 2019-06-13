@@ -32,6 +32,14 @@ Resources:
               Path: /orders
               Method: post
 
+    SagaEcOrderCreateCompensatedFunction:
+      Type: AWS::Serverless::Function
+      Properties:
+        Runtime: python3.6
+        Handler: order.createCompensated
+        Role: arn:aws:iam::725683553534:role/saga-ec-Lambda  
+        CodeUri: 'functions/order/lambda_function.zip'
+
     SagaEcOrderSfn:
       Type: AWS::Serverless::Function
       Properties:
@@ -39,6 +47,14 @@ Resources:
         Handler: order_sfn.create
         Role: arn:aws:iam::725683553534:role/saga-ec-Lambda  
         CodeUri: 'functions/order_sfn/lambda_function.zip'
+
+    # SagaEcOrderCompensatedSfn:
+    #   Type: AWS::Serverless::Function
+    #   Properties:
+    #     Runtime: python3.6
+    #     Handler: order_sfn.createCompensated
+    #     Role: arn:aws:iam::725683553534:role/saga-ec-Lambda  
+    #     CodeUri: 'functions/order_sfn/lambda_function.zip'
 
     SagaEcOrderReadFunction:
       Type: AWS::Serverless::Function
@@ -86,6 +102,15 @@ Resources:
             Properties:
               Queue: 'arn:aws:sqs:us-east-1:725683553534:saga-ec-order'
               BatchSize: 10
+
+    SagaEcStockCreateComensatedFunction:
+      Type: AWS::Serverless::Function
+      Properties:
+        Runtime: python3.6
+        Handler: stock.createCompensated
+        Role: arn:aws:iam::725683553534:role/saga-ec-Lambda
+        CodeUri: 'functions/stock/lambda_function.zip'
+        Events:
               
     SagaEcPaymentCreateFunction:
       Type: AWS::Serverless::Function

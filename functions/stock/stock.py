@@ -164,6 +164,9 @@ def create(event, context):
 def createCompensated(event, context):
     #requestList = __extractRequest(event, context)
     #for req in requestList:
+    txId = event["txId"] if 'txId' in event else event['TxId']
+    temp = {"pathParameters": {"txId":txId}}
+    temp = event.update(temp)
     res = read(event, context)
     if 'Item' in res:
         item = res["Item"]
@@ -179,15 +182,24 @@ def createCompensated(event, context):
         else:
             print("## ItemId: is NOTHING.")
 
+        # Get txId for compenstion
+        compTxId = event["taskresult"]['compTxId']
+        # if ('taskresult' in event and 'compTxId' in event['taskresult']) else 'tempCompTxId''
         # Disable old Tx
-        update(event["txId"], True, event["compTxId"])
+        update(txId, True, compTxId)
 
         # Insert Compensated Tx
-        event["originTxId"] = event["txId"]
-        event["txId"] = event["compTxId"]
+        event["originTxId"] = txId
+        event["txId"] = compTxId
         item["Amount"] = - amount
         event.update(item)
-        del event["body"], event["Records"]
+        
+        if 'body' in  event:
+            del event["body"]
+
+        if 'Records' in  event:
+            del event["Records"] 
+
         create(event, context)
 
         resMaster = readMaster(itemId)

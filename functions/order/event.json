@@ -1,4 +1,6 @@
 {
+    "compTxId": "578ea9ce-9f86-4fdb-9436-c5a6d8e6999c",
+    "txId": "30a1e207-13f7-4ea9-a7f9-435a0c56cc1f",
     "id": "prodid_0001",
     "orderNo": "OR-9999-9999",
     "itemName": "pullover jacket",
@@ -6,9 +8,6 @@
     "amount": 5,
     "price": 3000,
     "userId": "U100",
-    "pathParameters": {
-        "itemId": "A100"
-    },
     "body": {
         "id": "prodid_0001",
         "orderNo": "OR-9999-9999",

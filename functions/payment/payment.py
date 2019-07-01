@@ -16,7 +16,24 @@ dynamodb = boto3.resource('dynamodb').Table(TABLE_NAME)
 
 def list(event, context):
     res = dynamodb.scan()
-    return { 'body' : str(res) }
+    data = res['Items']
+    return _response(data, '200')
+
+def listMaster(event, context):
+    res = dynamodbMaster.scan()
+    data = res['Items']
+    return _response(data, '200')
+
+def _response(message, status_code):
+    return {
+        "statusCode": str(status_code),
+        "body": json.dumps(message, cls=DecimalEncoder),
+        "headers": {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+            },
+        }
+
 
 def read(event, context):
     print(event["pathParameters"]["txId"])
@@ -129,3 +146,12 @@ def create(event, context):
         )
         # enQueue(createItem)
         return { 'body' : str(res) }
+
+class DecimalEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, decimal.Decimal):
+            if o % 1 > 0:
+                return float(o)
+            else:
+                return int(o)
+        return super(DecimalEncoder, self).default(o)

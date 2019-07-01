@@ -34,9 +34,6 @@ def read(event, context):
     )   
     return res
 
-def lambda_handler(event, context):
-    print("This method is dummy.")
-
 def list(event, context):
     res = dynamodb.scan()
     data = res['Items']

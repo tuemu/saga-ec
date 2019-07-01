@@ -16,7 +16,24 @@ dynamodb = boto3.resource('dynamodb').Table(TABLE_NAME)
 
 def list(event, context):
     res = dynamodb.scan()
-    return { 'body' : str(res) }
+    data = res['Items']
+    return _response(data, '200')
+
+def listMaster(event, context):
+    res = dynamodbMaster.scan()
+    data = res['Items']
+    return _response(data, '200')
+
+def _response(message, status_code):
+    return {
+        "statusCode": str(status_code),
+        "body": json.dumps(message, cls=DecimalEncoder),
+        "headers": {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+            },
+        }
+
 
 def read(event, context):
     print(event["pathParameters"]["txId"])

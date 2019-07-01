@@ -48,14 +48,6 @@ Resources:
         Role: arn:aws:iam::725683553534:role/saga-ec-Lambda  
         CodeUri: 'functions/order_sfn/lambda_function.zip'
 
-    # SagaEcOrderCompensatedSfn:
-    #   Type: AWS::Serverless::Function
-    #   Properties:
-    #     Runtime: python3.6
-    #     Handler: order_sfn.createCompensated
-    #     Role: arn:aws:iam::725683553534:role/saga-ec-Lambda  
-    #     CodeUri: 'functions/order_sfn/lambda_function.zip'
-
     SagaEcOrderReadFunction:
       Type: AWS::Serverless::Function
       Properties:
@@ -111,7 +103,35 @@ Resources:
         Role: arn:aws:iam::725683553534:role/saga-ec-Lambda
         CodeUri: 'functions/stock/lambda_function.zip'
         Events:
-              
+
+    SagaEcStockListFunction:
+      Type: AWS::Serverless::Function
+      Properties:
+        Runtime: python3.6
+        Handler: stock.list
+        Role: arn:aws:iam::725683553534:role/saga-ec-Lambda  
+        CodeUri: 'functions/order/lambda_function.zip'
+        Events:
+          Api:
+            Type: Api
+            Properties:
+              Path: /stocks
+              Method: get
+
+    SagaEcStockListMasterFunction:
+      Type: AWS::Serverless::Function
+      Properties:
+        Runtime: python3.6
+        Handler: stock.listMaster
+        Role: arn:aws:iam::725683553534:role/saga-ec-Lambda  
+        CodeUri: 'functions/order/lambda_function.zip'
+        Events:
+          Api:
+            Type: Api
+            Properties:
+              Path: /items/stocks
+              Method: get
+
     SagaEcPaymentCreateFunction:
       Type: AWS::Serverless::Function
       Properties:
@@ -124,9 +144,37 @@ Resources:
           Api:
             Type: Api
             Properties:
-              Path: /payment
+              Path: /payments
               Method: post
  
+    SagaEcPaymentListFunction:
+      Type: AWS::Serverless::Function
+      Properties:
+        Runtime: python3.6
+        Handler: payment.list
+        Role: arn:aws:iam::725683553534:role/saga-ec-Lambda  
+        CodeUri: 'functions/order/lambda_function.zip'
+        Events:
+          Api:
+            Type: Api
+            Properties:
+              Path: /payments
+              Method: get
+
+    SagaEcPaymentListMasterFunction:
+      Type: AWS::Serverless::Function
+      Properties:
+        Runtime: python3.6
+        Handler: payment.listMaster
+        Role: arn:aws:iam::725683553534:role/saga-ec-Lambda  
+        CodeUri: 'functions/order/lambda_function.zip'
+        Events:
+          Api:
+            Type: Api
+            Properties:
+              Path: /users/payments
+              Method: get
+
     LambdaToDynamoDbIamRole:
       Type: AWS::IAM::Role
       Properties:

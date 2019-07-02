@@ -46,7 +46,7 @@ def read(event, context):
     return res
 
 def update(txId:str, isCompensated:bool, compTxId:str):
-    print("## Start update(" + str(txId) + ", " + str(isCompensated) + ")")
+    print("## Start updateMaster(" + str(txId) + ", " + str(isCompensated) + ")")
 
     res = dynamodb.update_item(
         Key={
@@ -67,7 +67,7 @@ def readMaster(itemId):
     res = dynamodbMaster.get_item(
         Key={
             "ItemId": itemId
-        }   
+        }
     )   
     return res
 
@@ -106,7 +106,7 @@ def __isReserve(req):
         print("## item: "+ str(item))
 
         if 'Stock' in item:
-            stock = item["Stock"] if 'Stock' in item else req['stock']
+            stock = item["Stock"]
         
         else:
             print("## Stock: is NOTHING.")
@@ -114,12 +114,13 @@ def __isReserve(req):
     else:
         print("## item: is NOTHING.")
     
-    print("## stock: " + str(stock) + " / amount: " + str(amount))
-    print("## stock - amount: " + str(stock - amount))
-    
+    print("## stock in __isReserve: " + str(stock) + " / amount: " + str(amount))
+    print("## stock - amount in __isReserve: " + str(stock - amount))
+
     if ("stock" in locals() and stock > amount):
         print("## START updateMaster(itemId, stock - amount): " + str(itemId) + " , " + str(stock-amount) )
         resMaster = updateMaster(itemId, stock - amount)
+        
         return True #{'body': str(resMaster)}
 
     else:
@@ -220,34 +221,38 @@ def createCompensated(event, context):
 
         create(event, context)
 
-        resMaster = readMaster(itemId)
-        if 'Item' in resMaster:
-            item = resMaster["Item"]
-            print("## item: "+ str(item))
+        # resMaster = readMaster(itemId)
+        # if 'Item' in resMaster:
+        #     item = resMaster["Item"]
+        #     print("## item: "+ str(item))
 
-            if 'Stock' in item:
-                stock = item["Stock"]
+        #     if 'Stock' in item:
+        #         stock = item["Stock"]
             
-            else:
-                print("## Stock: is NOTHING.")
-                stock = 0
+        #     else:
+        #         print("## Stock: is NOTHING.")
+        #         stock = 0
 
-        else:
-            print("## Item in Master: is NOTHING.")
+        # else:
+        #     print("## Item in Master: is NOTHING.")
 
+        return True #{'body': str(resMaster)}
+        
     else:
         print("## Item: is NOTHING.")
-
-    if ("itemId" in locals() and "amount" in locals()):
-        print("## START updateMaster(itemId, stock - amount) FOR createCompensated: " + str(itemId) + " , " + str(stock-amount) )
-        resMaster = updateMaster(itemId, stock + amount)
         
-        return True #{'body': str(resMaster)}
+    # print("## stock in createCompensated(): " + str(stock))
+    # print("## amount in createCompensated(): " + str(amount))
 
-    else:
-        print("It did not update in Compensation")
+    # if ("itemId" in locals() and "amount" in locals()):
+    #     resMaster = updateMaster(itemId, stock + amount)
+        
+    #     return True #{'body': str(resMaster)}
 
-    return False #{ 'body' : str(res) }
+    # else:
+    #     print("It did not update in Compensation")
+
+        return False #{ 'body' : str(res) }
 
 def decimal_default_proc(obj):
     if isinstance(obj, Decimal):

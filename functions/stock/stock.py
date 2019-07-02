@@ -46,7 +46,7 @@ def read(event, context):
     return res
 
 def update(txId:str, isCompensated:bool, compTxId:str):
-    print("## Start updateMaster(" + str(txId) + ", " + str(isCompensated) + ")")
+    print("## Start update(" + str(txId) + ", " + str(isCompensated) + ")")
 
     res = dynamodb.update_item(
         Key={
@@ -106,7 +106,7 @@ def __isReserve(req):
         print("## item: "+ str(item))
 
         if 'Stock' in item:
-            stock = item["Stock"]
+            stock = item["Stock"] if 'Stock' in item else req['stock']
         
         else:
             print("## Stock: is NOTHING.")
@@ -114,10 +114,12 @@ def __isReserve(req):
     else:
         print("## item: is NOTHING.")
     
+    print("## stock: " + str(stock) + " / amount: " + str(amount))
+    print("## stock - amount: " + str(stock - amount))
+    
     if ("stock" in locals() and stock > amount):
-        print("## stock: " + str(stock))
+        print("## START updateMaster(itemId, stock - amount): " + str(itemId) + " , " + str(stock-amount) )
         resMaster = updateMaster(itemId, stock - amount)
-        
         return True #{'body': str(resMaster)}
 
     else:
@@ -237,6 +239,7 @@ def createCompensated(event, context):
         print("## Item: is NOTHING.")
 
     if ("itemId" in locals() and "amount" in locals()):
+        print("## START updateMaster(itemId, stock - amount) FOR createCompensated: " + str(itemId) + " , " + str(stock-amount) )
         resMaster = updateMaster(itemId, stock + amount)
         
         return True #{'body': str(resMaster)}

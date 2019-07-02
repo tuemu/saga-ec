@@ -89,7 +89,8 @@ def create(event, context):
         Item = createItem
     )
     enQueue(createItem)
-    return { 'body' : str(res) }
+    # return { 'body' : str(res) }
+    return _response(res, '201')
 
 def createCompensated(event, context):
     #requestList = __extractRequest(event, context)
